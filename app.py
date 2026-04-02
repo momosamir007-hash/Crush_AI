@@ -34,7 +34,7 @@ if uploaded_file is not None:
             
             # تنفيذ التوقع (Inference)
             # وضعنا نسبة الثقة 0.25، يمكنك رفعها لاحقاً إذا ظهرت مربعات خاطئة
-            results = model.predict(source=img_array, conf=0.25)
+            results = model.predict(source=img_array, conf=0.05)
             
             # استخراج الصورة مع المربعات المرسومة حول الحلوى
             res_plotted = results[0].plot()

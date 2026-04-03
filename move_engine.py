@@ -21,7 +21,7 @@ class CandyEngine:
                             valid_moves.append({
                                 'pos1': (r, c),
                                 'pos2': (r, c + 1),
-                                'direction': 'Right ➡️',
+                                'direction': 'Right',
                                 'score': score,
                                 'details': match_details
                             })
@@ -33,14 +33,14 @@ class CandyEngine:
                             valid_moves.append({
                                 'pos1': (r, c),
                                 'pos2': (r + 1, c),
-                                'direction': 'Down ⬇️',
+                                'direction': 'Down',
                                 'score': score,
                                 'details': match_details
                             })
         valid_moves.sort(key=lambda x: x['score'], reverse=True)
         return valid_moves
 
-    def _evaluate_swap(self, pos1: Tuple[int, int], pos2: Tuple[int, int]) -> Tuple[int, str]:
+    def _evaluate_swap(self, pos1, pos2):
         temp_grid = np.copy(self.grid)
         temp_grid[pos1[0], pos1[1]], temp_grid[pos2[0], pos2[1]] = \
             temp_grid[pos2[0], pos2[1]], temp_grid[pos1[0], pos1[1]]
@@ -62,7 +62,7 @@ class CandyEngine:
             return 0, "No match"
         return total_score, " | ".join(details)
 
-    def _check_matches_at(self, grid: np.ndarray, r: int, c: int) -> Dict:
+    def _check_matches_at(self, grid, r, c):
         color = grid[r, c]
         if color in ['empty', 'blocker', 'unknown']:
             return {'h_len': 0, 'v_len': 0}
@@ -82,7 +82,7 @@ class CandyEngine:
         v_len = down - up + 1
         return {'h_len': h_len, 'v_len': v_len}
 
-    def _calculate_score(self, match_length: int) -> int:
+    def _calculate_score(self, match_length):
         if match_length == 3:
             return 10
         elif match_length == 4:

@@ -19,8 +19,16 @@ st.set_page_config(
 # CSS مخصص
 st.markdown("""
 <style>
-    body { direction: rtl; }
-    .main { direction: rtl; }
+    /* تم إزالة direction: rtl من body و .main لمنع الشريط الجانبي من الانتقال لليمين وتجنب مشكلة الإغلاق في المنتصف */
+    .block-container {
+        direction: rtl;
+        text-align: right;
+    }
+    
+    p, h1, h2, h3, h4, h5, h6, span, div.stMarkdown, label { 
+        direction: rtl; 
+        text-align: right; 
+    }
     
     .metric-card {
         background: linear-gradient(135deg, #1e3a5f, #2d6a9f);
@@ -784,9 +792,23 @@ tab1, tab2, tab3, tab4 = st.tabs([
 
 # --- التبويب 1: السلسلة الزمنية ---
 with tab1:
-    n_show = st.slider("عدد القيم المعروضة", 50, len(data), 200, 50)
-    data_show = data[-n_show:]
-    idx_show  = list(range(len(data) - n_show, len(data)))
+    max_len = len(data)
+    min_val = min(50, max_len) if max_len > 0 else 1
+    default_val = min(200, max_len) if max_len > 0 else 1
+    
+    n_show = st.slider(
+        "عدد القيم المعروضة", 
+        min_value=min_val, 
+        max_value=max(min_val, max_len), 
+        value=default_val
+    )
+    
+    # تصحيح مشكلة IndexError عن طريق التأكد من أن المؤشرات دائمًا داخل النطاق
+    n_show = min(n_show, max_len)
+    start_idx = max(0, max_len - n_show)
+    
+    data_show = data[start_idx:]
+    idx_show  = list(range(start_idx, max_len))
 
     fig1 = go.Figure()
 
@@ -802,6 +824,7 @@ with tab1:
     # تمييز القفزات
     jump_x = [i for i in idx_show if data[i] >= threshold]
     jump_y = [data[i] for i in jump_x]
+    
     fig1.add_trace(go.Scatter(
         x=jump_x, y=jump_y,
         mode='markers',
@@ -838,7 +861,7 @@ with tab1:
     # العداد التراكمي
     acc_trace = []
     acc_running = 0.0
-    for v in data[-n_show:]:
+    for v in data_show:
         if v >= threshold:
             acc_trace.append(acc_running)
             acc_running = 0.0
@@ -976,7 +999,7 @@ with tab3:
 
     # آخر 50 قفزة
     last50_j = all_jumps[-50:]
-    last50_i = list(range(len(all_jumps) - 50, len(all_jumps)))
+    last50_i = list(range(len(all_jumps) - len(last50_j), len(all_jumps)))
     fig3.add_trace(
         go.Bar(
             x=last50_i, y=last50_j,
